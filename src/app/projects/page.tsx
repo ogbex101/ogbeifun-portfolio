@@ -1,8 +1,29 @@
 import ProjectCard from '../../components/ProjectCard'
 
-async function getProjects() {
+interface Project {
+  id: string
+  title: string
+  description: string
+  technologiesString: string
+  githubUrl: string | null
+  liveUrl: string | null
+  category: string
+  featured: boolean
+  images: Array<{
+    id: string
+    url: string
+    altText: string | null
+    order: number
+  }>
+}
+
+async function getProjects(): Promise<Project[]> {
   try {
-    const response = await fetch('http://localhost:3000/api/projects', {
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000'
+    
+    const response = await fetch(`${baseUrl}/api/projects`, {
       cache: 'no-store'
     })
     
@@ -31,7 +52,7 @@ export default async function ProjectsPage() {
 
       {projects.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {projects.map((project: Project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
