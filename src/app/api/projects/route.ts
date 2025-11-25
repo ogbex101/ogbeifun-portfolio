@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '../../../../lib/prisma'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('📨 Received project creation request')
+    
     const body = await request.json()
+    console.log('📝 Request body:', body)
+    
+    // Validate required fields
+    if (!body.title || !body.description || !body.technologiesString || !body.category) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+    
+    console.log('🛢 Attempting to create project in database...')
     
     const project = await prisma.project.create({
       data: {
@@ -17,11 +32,22 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('✅ Project created successfully:', project.id)
+    
     return NextResponse.json(project)
-  } catch (error) {
-    console.error('Error creating project:', error)
+  } catch (error: any) {
+    console.error('❌ Error creating project:', error)
+    
+    // More specific error messages
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Project with this title already exists' },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to create project' },
+      { error: `Database error: ${error.message}` },
       { status: 500 }
     )
   }
@@ -43,7 +69,7 @@ export async function GET() {
     })
 
     return NextResponse.json(projects)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching projects:', error)
     return NextResponse.json(
       { error: 'Failed to fetch projects' },

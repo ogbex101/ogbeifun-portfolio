@@ -63,7 +63,18 @@ var __TURBOPACK__imported__module__$5b$externals$5d2f40$prisma$2f$client__$5b$ex
 const prisma = new __TURBOPACK__imported__module__$5b$externals$5d2f40$prisma$2f$client__$5b$external$5d$__$2840$prisma$2f$client$2c$__cjs$29$__["PrismaClient"]();
 async function POST(request) {
     try {
+        console.log('📨 Received project creation request');
         const body = await request.json();
+        console.log('📝 Request body:', body);
+        // Validate required fields
+        if (!body.title || !body.description || !body.technologiesString || !body.category) {
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                error: 'Missing required fields'
+            }, {
+                status: 400
+            });
+        }
+        console.log('🛢 Attempting to create project in database...');
         const project = await prisma.project.create({
             data: {
                 title: body.title,
@@ -75,11 +86,20 @@ async function POST(request) {
                 featured: body.featured || false
             }
         });
+        console.log('✅ Project created successfully:', project.id);
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json(project);
     } catch (error) {
-        console.error('Error creating project:', error);
+        console.error('❌ Error creating project:', error);
+        // More specific error messages
+        if (error.code === 'P2002') {
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                error: 'Project with this title already exists'
+            }, {
+                status: 400
+            });
+        }
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-            error: 'Failed to create project'
+            error: `Database error: ${error.message}`
         }, {
             status: 500
         });
