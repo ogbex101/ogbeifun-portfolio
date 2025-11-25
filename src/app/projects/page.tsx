@@ -19,7 +19,8 @@ interface Project {
 
 async function getProjects(): Promise<Project[]> {
   try {
-    const baseUrl = process.env.NODE_ENV === 'production' 
+    // Use relative URL - works in both environments
+    const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : 'http://localhost:3000'
     
@@ -28,12 +29,11 @@ async function getProjects(): Promise<Project[]> {
     })
     
     if (!response.ok) {
-      throw new Error('Failed to fetch projects')
+      return []
     }
     
     return await response.json()
   } catch (error) {
-    console.error('Error fetching projects:', error)
     return []
   }
 }

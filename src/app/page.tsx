@@ -20,16 +20,22 @@ interface Project {
 
 async function getProjects(): Promise<Project[]> {
   try {
-    const response = await fetch('http://localhost:3000/api/projects', {
+    // Use relative URL for both local and production
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://your-domain.vercel.app'
+      : 'http://localhost:3000'
+    
+    const response = await fetch(`${baseUrl}/api/projects`, {
       cache: 'no-store'
     })
     
     if (!response.ok) {
-      return []
+      throw new Error('Failed to fetch projects')
     }
     
     return await response.json()
   } catch (error) {
+    console.error('Error fetching projects:', error)
     return []
   }
 }
