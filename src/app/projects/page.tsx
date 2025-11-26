@@ -19,19 +19,15 @@ interface Project {
 
 async function getProjects(): Promise<Project[]> {
   try {
-    // Use relative URL - works in both environments
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : 'http://localhost:3000'
     
-    const response = await fetch(`${baseUrl}/api/projects`, {
-      cache: 'no-store'
+    const response = await fetch(`${baseUrl}/api/projects`, { 
+      cache: 'no-store' 
     })
     
-    if (!response.ok) {
-      return []
-    }
-    
+    if (!response.ok) return []
     return await response.json()
   } catch (error) {
     return []
