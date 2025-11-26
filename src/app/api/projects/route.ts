@@ -55,24 +55,24 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
+    console.log('🔍 API Projects route called')
+    
     const projects = await prisma.project.findMany({
       include: {
         images: {
-          orderBy: {
-            order: 'asc'
-          }
+          orderBy: { order: 'asc' }
         }
       },
-      orderBy: {
-        createdAt: 'desc'
-      }
+      orderBy: { createdAt: 'desc' }
     })
 
+    console.log(`📊 Found ${projects.length} projects`)
+    
     return NextResponse.json(projects)
   } catch (error: any) {
-    console.error('Error fetching projects:', error)
+    console.error('❌ API Error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+      { error: error.message },
       { status: 500 }
     )
   }

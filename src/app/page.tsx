@@ -10,6 +10,8 @@ interface Project {
   liveUrl: string | null
   category: string
   featured: boolean
+  createdAt: string
+  updatedAt: string
   images: Array<{
     id: string
     url: string
@@ -20,20 +22,24 @@ interface Project {
 
 async function getProjects(): Promise<Project[]> {
   try {
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}`
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://ogbeifun-portfolio.vercel.app'
       : 'http://localhost:3000'
     
-    const response = await fetch(`${baseUrl}/api/projects`, { 
-      cache: 'no-store' 
+    const response = await fetch(`${baseUrl}/api/projects`, {
+      cache: 'no-store'
     })
     
-    if (!response.ok) return []
+    if (!response.ok) {
+      return []
+    }
+    
     return await response.json()
   } catch (error) {
     return []
   }
 }
+
 const techStack = [
   { name: 'PHP', level: 90 },
   { name: 'Next.js', level: 85 },
@@ -48,6 +54,9 @@ const techStack = [
 export default async function Home() {
   const projects = await getProjects()
   const featuredProjects = projects.filter((project: Project) => project.featured)
+
+  console.log('Total projects:', projects.length)
+  console.log('Featured projects:', featuredProjects.length)
 
   return (
     <main className="min-h-screen bg-gray-50">
